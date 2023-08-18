@@ -28,7 +28,7 @@ Purpose: This Lambda function is designed to consume messages from an SQS queue,
 
 Lambda 2: DynamoDB Stream Consumer, Vector Encoder, Centroid Comparator
 
-Purpose: This Lambda function is designed to consume data from a DynamoDB stream (as indicated by event['Records'] which suggests it's triggered by a DynamoDB stream), encode the data into vectors, compare these vectors to existing centroids, and update centroids or send alerts as necessary.
+Purpose: This Lambda function is designed to consume data from a DynamoDB stream, encode the data into vectors, compare these vectors to existing centroids, and update centroids or send alerts as necessary.
 
 1) DynamoDB Stream Consumption - The function is triggered by changes to the DynamoDB table. This means whenever a new item is added (or an existing item is modified) in the DynamoDB table, this Lambda function will be invoked.
 
