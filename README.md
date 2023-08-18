@@ -12,19 +12,41 @@ A series of serverless stepwise functions (and Terraform) for consuming language
 
 ## Description:
 
-Lambda #1 does the following:
+Lambda 1: SQS Consumer, Comprehend Enricher, DynamoDB Loader
 
-1) Triggered by new records on either or both SQS queues.
-2) Writes the SQS records to an S3 store, adding a field indicating the source queue.
-3) Evaluates against threshold to process data landing on S3; initiates topic and sentiment enrichments
-6) Enriched Data is loaded to DynamoDB
+Purpose: This Lambda function is designed to consume messages from an SQS queue, enrich the data using Amazon Comprehend for topic detection and sentiment analysis, and then load the enriched data into a DynamoDB table.
 
-Lambda #2 does x, y, and z:
-1)
-2)
-3)
+1) SQS Consumption - The function starts by fetching messages from an SQS queue (event['Records']). This means that this Lambda is triggered whenever there are new messages in the SQS queue.
 
-Terraform Script Provisions DynamoDB instance
+2) Data Enrichment - For every record from SQS, the function:
+    * Writes the data to S3.
+    * Starts a topic detection job using Amazon Comprehend if enough records have been accumulated.
+    * Once topic detection is done, it starts a sentiment detection job.
+    * After sentiment detection, the data (text, topics, sentiment) is enriched and ready for storage.
+
+3) DynamoDB Loading - The enriched data is then loaded into a DynamoDB table.
+
+Lambda 2: DynamoDB Stream Consumer, Vector Encoder, Centroid Comparator
+
+Purpose: This Lambda function is designed to consume data from a DynamoDB stream (as indicated by event['Records'] which suggests it's triggered by a DynamoDB stream), encode the data into vectors, compare these vectors to existing centroids, and update centroids or send alerts as necessary.
+
+1) DynamoDB Stream Consumption - The function is triggered by changes to the DynamoDB table. This means whenever a new item is added (or an existing item is modified) in the DynamoDB table, this Lambda function will be invoked.
+
+2) Data Encoding - For every new or modified item in the DynamoDB table, the function:
+    * Encodes the text, topics, and sentiment fields into a 768-dimensional vector using SBERT.
+    * Loads these vectors into Pinecone.
+
+3) Centroid Comparison - For each encoded vector:
+    * The function fetches the corresponding centroid from the DynamoDB table.
+    * If the centroid exists, it calculates the distance between the new vector and the centroid.
+    * If the distance exceeds a threshold, the centroid is updated, and an alert is sent to an SQS queue.
+    * If no centroid exists for the attribute-value pair, a new centroid is created.
+
+Terraform Module:
+
+1) Script Provisions DynamoDB instance alongside Lambda 1 & Lambda 2
+
+2) Applies requisite Resource Policy allowing Dynamo DB Streams to invoke Lambda 2
 
 ## Rationale:
 
@@ -34,7 +56,10 @@ Make it easier to monitor inputs and outputs to/from language models; eventually
 
 
 ____________
+
 To do:
+
+Lambda 1)
 
 Avoid Duplicate Entries or Missing Values-
 
@@ -50,3 +75,20 @@ Optimize AWS Comprehend Job Starts-
 
     The function process_record starts a Comprehend job for every 1000 records within the loop.
     Planned Change: Consider aggregating the records and starting the job once after the loop.
+
+
+Lambda 2) 
+
+Improve Error Handling to be AWS Service Specific
+
+Have GPT4 suggest any other opportunties for improvement
+
+etc
+
+
+
+Terraform Module)
+
+Provisioning; currently has none
+
+Identify if other policies are needed outside the resource policy allowing Lambda 2 invocation by DynamoDB Streams
