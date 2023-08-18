@@ -63,18 +63,18 @@ Lambda 1)
 
 Avoid Duplicate Entries or Missing Values-
 
-    The function load_to_dynamodb writes to DynamoDB without checking for duplicates.
-    Planned Change: Before writing to DynamoDB, check if the record already exists and decide whether to update, skip, or throw an error.
+The function load_to_dynamodb writes to DynamoDB without checking for duplicates.
+Planned Change: Before writing to DynamoDB, check if the record already exists and decide whether to update, skip, or throw an error.
 
 Limit AWS API Calls in a Loop-
 
-    The function process_record still lists objects and starts jobs in loops.
-    Planned Change: Consider using pagination for s3.list_objects_v2 to handle a large number of objects and avoid making too many API calls.
+The function process_record still lists objects and starts jobs in loops.
+Planned Change: Consider using pagination for s3.list_objects_v2 to handle a large number of objects and avoid making too many API calls.
 
 Optimize AWS Comprehend Job Starts-
 
-    The function process_record starts a Comprehend job for every 1000 records within the loop.
-    Planned Change: Consider aggregating the records and starting the job once after the loop.
+The function process_record starts a Comprehend job for every 1000 records within the loop.
+Planned Change: Consider aggregating the records and starting the job once after the loop.
 
 
 Lambda 2) 
