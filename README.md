@@ -1,6 +1,16 @@
 # Jimmy Neutron and Serverless Stepwise Latent Space Monitoring
- A series of serverless stepwise functions for consuming language model inputs and outputs to S3, enriching the data via sentiment analysis and topic modelling, loading to DynamoDB and subsequently monitoring for the emergence new clustered topics or sentiment within the latent vector space.
+A series of serverless stepwise functions (and Terraform) for consuming language model inputs and outputs to S3, enriching the data via sentiment analysis and topic modelling, loading to DynamoDB and subsequently monitoring for the emergence new clustered topics or sentiment within the latent vector space.
 
+
+## ♫ The Dream of the 90's ♫ is alive in ~~Portland~~ ["a weird suite of Enterprise LLM tools"](https://github.com/users/rabbidave/projects/1) named after [Nicktoons](https://en.wikipedia.org/wiki/Nicktoons)
+### by [some dude in his 30s](https://www.linkedin.com/in/davidisaacpierce)
+#
+## Utility 6) # Jimmy Neutron and Serverless Stepwise Latent Space Monitoring
+
+<img src="https://static.wikia.nocookie.net/jimmyneutron/images/f/f2/3312414-jimmydog.jpg/revision/latest/scale-to-width-down/1000?cb=20230417181235" alt="Jimmy" title="Jimmy" width="15%">
+
+
+## Description:
 
 Lambda #1 does the following:
 
@@ -15,6 +25,13 @@ Lambda #2 does x, y, and z:
 3)
 
 Terraform Script Provisions DynamoDB instance
+
+## Rationale:
+
+1) User experience, instrumentation, and metadata capture are crucial to the adoption of LLMs for orchestration of [multi-modal agentic systems](https://en.wikipedia.org/wiki/Multi-agent_system); predicting the range of possible values at set prediction intervals allows for early warning of LLM Drift
+## Intent:
+Make it easier to monitor inputs and outputs to/from language models; eventually latent space applications as tokenization layers become less common
+
 
 ____________
 To do:
