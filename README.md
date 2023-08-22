@@ -1,6 +1,8 @@
 # Jimmy Neutron and Serverless Stepwise Latent Space Monitoring
 A series of serverless stepwise functions (and Terraform) for consuming language model inputs and outputs to S3, enriching the data via sentiment analysis and topic modelling, loading to DynamoDB and subsequently monitoring for the emergence new clustered topics or sentiment within the latent vector space.
 
+Note: originally intend to help mitigate the impact of [templated attack strings](https://colab.research.google.com/drive/1dUQDA7PVu1e4BbO5QX9Jks8nXHzQQilO?usp=sharing) from the smart folks at [llm-attacks.org](https://llm-attacks.org/)
+
 
 ## ♫ The Dream of the 90's ♫ is alive in ~~Portland~~ ["a weird suite of Enterprise LLM tools"](https://github.com/users/rabbidave/projects/1) named after [Nicktoons](https://en.wikipedia.org/wiki/Nicktoons)
 ### by [some dude in his 30s](https://www.linkedin.com/in/davidisaacpierce)
