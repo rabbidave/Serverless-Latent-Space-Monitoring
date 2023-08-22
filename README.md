@@ -14,7 +14,7 @@ Note: originally intend to help mitigate the impact of [templated attack strings
 
 ## Description:
 
-Lambda 1: SQS Consumer, Comprehend Enricher, DynamoDB Loader
+[Lambda 1:](https://github.com/rabbidave/Jimmy-Neutron-and-Serverless-Stepwise-Latent-Space-Monitoring/blob/main/Jimmy%20Neutron.py) SQS Consumer, Comprehend Enricher, DynamoDB Loader
 
 Purpose: This Lambda function is designed to consume messages from an SQS queue, enrich the data using Amazon Comprehend for topic detection and sentiment analysis, and then load the enriched data into a DynamoDB table.
 
@@ -28,7 +28,7 @@ Purpose: This Lambda function is designed to consume messages from an SQS queue,
 
 3) DynamoDB Loading - The enriched data is then loaded into a DynamoDB table.
 
-Lambda 2: DynamoDB Stream Consumer, Vector Encoder, Centroid Comparator
+[Lambda 2:](https://github.com/rabbidave/Jimmy-Neutron-and-Serverless-Stepwise-Latent-Space-Monitoring/blob/main/Goddard%2C%20Compute!.py) DynamoDB Stream Consumer, Vector Encoder, Centroid Comparator
 
 Purpose: This Lambda function is designed to consume data from a DynamoDB stream, encode the data into vectors, compare these vectors to existing centroids, and update centroids or send alerts as necessary.
 
