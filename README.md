@@ -1,96 +1,77 @@
-# Jimmy Neutron and Serverless Stepwise Latent Space Monitoring
-A series of serverless stepwise functions (and Terraform) for consuming language model inputs and outputs to S3, enriching the data via sentiment analysis and topic modelling, loading to DynamoDB and subsequently monitoring for the emergence new clustered topics or sentiment within the latent vector space.
+# Jimmy Neutron and Serverless Latent Space Monitoring
+A series of serverless functions/resources (and Terraform) for consuming language model inputs and outputs to S3, enriching the data via sentiment analysis and topic modelling, loading to DynamoDB and subsequently monitoring for the deviation within the latent vector space.
 
-Update: Support of monitoring of both [Language](https://www.zeroday.tools/), Vision, and [Mutlimodal](https://github.com/Zoky-2020/SGA) Attack Non-Conformity coming soon; including updated Lambdas and Terraform Modules
+Note: Support for monitoring [Text](https://www.zeroday.tools/), [Vision](https://github.com/Zoky-2020/SGA), and Multimodal Attack Non-Conformity coming soon
 
 
 ## ♫ The Dream of the 90's ♫ is alive in ~~Portland~~ ["a weird suite of Enterprise LLM tools"](https://github.com/users/rabbidave/projects/1) named after [Nicktoons](https://en.wikipedia.org/wiki/Nicktoons)
 ### by [some dude in his 30s](https://www.linkedin.com/in/davidisaacpierce)
 #
-## Utility 6) # Jimmy Neutron and Serverless Stepwise Latent Space Monitoring
 
-<img src="https://static.wikia.nocookie.net/jimmyneutron/images/f/f2/3312414-jimmydog.jpg/revision/latest/scale-to-width-down/1000?cb=20230417181235" alt="Jimmy" title="Jimmy" width="30%">
+
+<img src="https://static.wikia.nocookie.net/jimmyneutron/images/f/f2/3312414-jimmydog.jpg/revision/latest/scale-to-width-down/1000?cb=20230417181235" alt="Jimmy" title="Jimmy" width="10%">
 
 
 ## Description:
 
-[Lambda 1:](https://github.com/rabbidave/Jimmy-Neutron-and-Serverless-Stepwise-Latent-Space-Monitoring/blob/main/Jimmy%20Neutron.py) SQS Consumer, Comprehend Enricher, DynamoDB Loader
+### Lambda1 (Jimmy Neutron.py)
 
-Purpose: This Lambda function is designed to consume messages from an SQS queue, enrich the data using Amazon Comprehend for topic detection and sentiment analysis, and then load the enriched data into a DynamoDB table.
+    Initialization: 
+        
+        * Initializes clients for S3, Comprehend (as data enrichment), and DynamoDB.
 
-1) SQS Consumption - The function starts by fetching messages from an SQS queue (event['Records']). This means that this Lambda is triggered whenever there are new messages in the SQS queue.
+    State Management:
+        
+        * Retrieves and updates a state record in a DynamoDB table; tracking state across invocations.
 
-2) Data Enrichment - For every record from SQS, the function:
-    * Writes the data to S3.
-    * Starts a topic detection job using Amazon Comprehend if enough records have been accumulated.
-    * Once topic detection is done, it starts a sentiment detection job.
-    * After sentiment detection, the data (text, topics, sentiment) is enriched and ready for storage.
+    Processing:
+        
+        * Writes payloads to 'S3Comprehend' and initiates Comprehend jobs for topic and sentiment analysis, with results stored in S3; thereafter loading enriched data to DynamoDB such that new records are streamed to Lambda2 via DBStreams
 
-3) DynamoDB Loading - The enriched data is then loaded into a DynamoDB table.
+    IAM Permissions:
+        
+        * The Terraform module grants necessary permissions for S3, DynamoDB, and Comprehend interactions.
+       
+    Note: Ensure the 'DataAccessRoleArn' provided to Comprehend has the appropriate permissions to access S3 buckets.
 
-[Lambda 2:](https://github.com/rabbidave/Jimmy-Neutron-and-Serverless-Stepwise-Latent-Space-Monitoring/blob/main/Goddard%2C%20Compute!.py) DynamoDB Stream Consumer, Vector Encoder, Centroid Comparator
+### Lambda2 (Goddard, Compute!.py)
 
-Purpose: This Lambda function is designed to consume data from a DynamoDB stream, encode the data into vectors, compare these vectors to existing centroids, and update centroids or send alerts as necessary.
+    Initialization:
+        
+        * Initializes S3 (for large vector storage) and SQS (for alerting); identifying and caching the most recent centroid vector from 'S3VectorStore' at initialization for easier processing and alerting via SQS.
 
-1) DynamoDB Stream Consumption - The function is triggered by changes to the DynamoDB table. This means whenever a new item is added (or an existing item is modified) in the DynamoDB table, this Lambda function will be invoked.
+    Processing:
+        
+        * Triggered by net-new DynamoDB Stream Records, whereby it encodes items with the 'text' attribute using SBERT and compares them to the cached centroid; recording a new centroid in S3 if the comparison exceeds a predefined threshold which alerts via SQS.
 
-2) Data Encoding - For every new or modified item in the DynamoDB table, the function:
-    * Encodes the text, topics, and sentiment fields into a 768-dimensional vector using SBERT.
-    * Loads these vectors into Pinecone.
+    IAM Permissions:
+        
+        * Permissions for S3, SQS, and DynamoDB interactions are included in the Terraform module's IAM policy.
 
-3) Centroid Comparison - For each encoded vector:
-    * The function fetches the corresponding centroid from the DynamoDB table.
-    * If the centroid exists, it calculates the distance between the new vector and the centroid.
-    * If the distance exceeds a threshold, the centroid is updated, and an alert is sent to an SQS queue.
-    * If no centroid exists for the attribute-value pair, a new centroid is created.
+### Terraform Module
 
-Terraform Module:
+    Resource Definitions:
+        
+        * Defines DynamoDB tables, SQS queues, and IAM roles/policies in support of both Lambda functions.
 
-1) Script Provisions DynamoDB instance alongside Lambda 1 & Lambda 2
+    IAM Role Policy:
+        
+        * Grants access to S3, DynamoDB, SQS and Comprehend.
 
-2) Applies requisite Resource Policy allowing Dynamo DB Streams to invoke Lambda 2
+    Security Group and Lambda Configuration:
+        
+        * Defines a security group for Lambda functions and references 'module.lambda_functions' for Lambda deployment specifics
 
-## Rationale:
+### Forthcoming Changes
 
-1) User experience, instrumentation, and metadata capture are crucial to the adoption of LLMs for orchestration of [multi-modal agentic systems](https://en.wikipedia.org/wiki/Multi-agent_system); predicting the range of possible values at set prediction intervals allows for early warning of LLM Drift
-## Intent:
-Make it easier to monitor inputs and outputs to/from language models; eventually latent space applications as tokenization layers become less common
+    Lambda1:
+        
+        * Better Error Handling, Logging, and Monitoring of AWS Comprehend jobs
 
+    Lambda2:
+        
+        * Better Error Handling, Logging, and retry logic solving for delays in Centroid Vector availability
 
-____________
-
-To do:
-
-Lambda 1)
-
-Avoid Duplicate Entries or Missing Values-
-
-The function load_to_dynamodb writes to DynamoDB without checking for duplicates.
-Planned Change: Before writing to DynamoDB, check if the record already exists and decide whether to update, skip, or throw an error.
-
-Limit AWS API Calls in a Loop-
-
-The function process_record still lists objects and starts jobs in loops.
-Planned Change: Consider using pagination for s3.list_objects_v2 to handle a large number of objects and avoid making too many API calls.
-
-Optimize AWS Comprehend Job Starts-
-
-The function process_record starts a Comprehend job for every 1000 records within the loop.
-Planned Change: Consider aggregating the records and starting the job once after the loop.
-
-
-Lambda 2) 
-
-Improve Error Handling to be AWS Service Specific
-
-Have GPT4 suggest any other opportunties for improvement
-
-etc
-
-
-
-Terraform Module)
-
-Provisioning; currently has none
-
-Identify if other policies are needed outside the resource policy allowing Lambda 2 invocation by DynamoDB Streams
+    TF Module:
+        
+        * Conserved conventions across and support for other components (e.g. input pre-processing, output post-processing, forecasting, etc) of [LatentSpace.Tools](www.latentspace.tools)

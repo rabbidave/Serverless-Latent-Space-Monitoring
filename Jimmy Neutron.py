@@ -8,7 +8,7 @@ comprehend = boto3.client('comprehend')
 dynamodb = boto3.resource('dynamodb')
 
 # Configurations loaded from environment variables or configuration files
-S3_BUCKET_NAME = 'YourS3BucketName'
+S3_BUCKET_NAME = 'S3Comprehend'
 DYNAMODB_TABLE_NAME = 'MyDynamoDBTable'
 STATE_TABLE_NAME = 'LambdaStateTable'
 table = dynamodb.Table(DYNAMODB_TABLE_NAME)

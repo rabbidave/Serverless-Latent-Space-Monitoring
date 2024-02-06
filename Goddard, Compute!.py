@@ -9,7 +9,7 @@ dynamodb = boto3.resource('dynamodb')
 s3 = boto3.client('s3')
 sqs = boto3.client('sqs')
 ALERT_QUEUE_URL = os.environ['ALERT_QUEUE_URL']
-S3_BUCKET = os.environ['S3_BUCKET_NAME']
+S3_BUCKET = os.environ['S3VectorStore']
 
 VECTOR_DIMENSION = 768
 THRESHOLD = 0.7 * np.sqrt(VECTOR_DIMENSION)
