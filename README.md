@@ -9,7 +9,7 @@ Note: Support for monitoring [Text](https://www.zeroday.tools/), [Vision](https:
 #
 
 
-<img src="https://static.wikia.nocookie.net/jimmyneutron/images/f/f2/3312414-jimmydog.jpg/revision/latest/scale-to-width-down/1000?cb=20230417181235" alt="Jimmy" title="Jimmy" width="10%">
+<img src="https://static.wikia.nocookie.net/jimmyneutron/images/f/f2/3312414-jimmydog.jpg/revision/latest/scale-to-width-down/1000?cb=20230417181235" alt="Jimmy" title="Jimmy" width="20%">
 
 
 ## Description:
