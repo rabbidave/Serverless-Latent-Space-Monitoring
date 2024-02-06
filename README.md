@@ -1,5 +1,5 @@
 # Jimmy Neutron and Serverless Latent Space Monitoring
-A series of serverless functions/resources (and Terraform) for consuming language model inputs and outputs to S3, enriching the data via sentiment analysis and topic modelling, loading to DynamoDB and subsequently monitoring for the deviation within the latent vector space.
+A series of serverless functions/resources (and Terraform) for consuming language model inputs and outputs to S3, enriching the data via sentiment analysis and topic modelling, loading to DynamoDB and subsequently monitoring for configurable deviation within the latent vector space.
 
 Note: Support for monitoring [Text](https://www.zeroday.tools/), [Vision](https://github.com/Zoky-2020/SGA), and Multimodal Attack Non-Conformity coming soon
 
