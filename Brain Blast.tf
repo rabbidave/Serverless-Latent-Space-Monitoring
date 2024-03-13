@@ -13,19 +13,16 @@ provider "aws" {
 }
 
 module "dynamodb_table" {
-  source = "terraform-aws-modules/dynamodb-table/aws"
-
-  name         = var.dynamodb_name
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "id"
-
+  source         = "terraform-aws-modules/dynamodb-table/aws"
+  name           = var.dynamodb_name
+  billing_mode   = "PAY_PER_REQUEST"
+  hash_key       = "id"
   attributes = [
     {
       name = "id"
       type = "S"
     }
   ]
-
   tags = merge(var.tags, { Name = var.dynamodb_name })
 }
 
@@ -41,7 +38,6 @@ resource "aws_sqs_queue" "deadletter_queue" {
 
 resource "aws_iam_role" "iam_for_lambda" {
   name = "iam_for_lambda_${var.environment_name}"
-
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -59,7 +55,6 @@ resource "aws_iam_role" "iam_for_lambda" {
 resource "aws_iam_role_policy" "lambda_policy" {
   name = "lambda_access_policy_${var.environment_name}"
   role = aws_iam_role.iam_for_lambda.id
-
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
@@ -70,6 +65,8 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "dynamodb:PutItem",
           "s3:PutObject",
           "s3:GetObject",
+          "s3:ListBucket",  // Added permission for listing objects in the S3 bucket
+          "s3:DeleteObject",  // Added permission for deleting objects from the S3 bucket
           "sqs:SendMessage",
           "sqs:ReceiveMessage",
           "comprehend:StartTopicsDetectionJob",
@@ -103,32 +100,32 @@ resource "aws_security_group" "sg" {
 # It should encapsulate the creation of Lambda functions, accepting configuration parameters for each function.
 module "lambda_functions" {
   source = "./modules/lambda"
-
   lambda_configs = [
     {
-      name             = "jimmyneutron"
-      handler          = "jimmyneutron.handler"
-      filename         = "jimmyneutron.zip"
-      source_code_hash = filebase64sha256("jimmyneutron.zip")
-      environment_vars = {
+      name              = "jimmyneutron"
+      handler           = "jimmyneutron.handler"
+      filename          = "jimmyneutron.zip"
+      source_code_hash  = filebase64sha256("jimmyneutron.zip")
+      environment_vars  = {
         DYNAMODB_TABLE = module.dynamodb_table.this_table_name
       }
       security_group_ids = [aws_security_group.sg.id]
       subnet_ids         = var.subnet_ids
     },
     {
-      name             = "goddardcompute"
-      handler          = "goddardcompute.handler"
-      filename         = "goddardcompute.zip"
-      source_code_hash = filebase64sha256("goddardcompute.zip")
-      environment_vars = {
+      name              = "goddardcompute"
+      handler           = "goddardcompute.handler"
+      filename          = "goddardcompute.zip"
+      source_code_hash  = filebase64sha256("goddardcompute.zip")  // Update this hash whenever the Lambda code changes
+      environment_vars  = {
         ALERT_QUEUE_URL = aws_sqs_queue.alert_queue.url
+        S3_BUCKET       = var.s3_bucket_arn  // Added environment variable for the S3 bucket
+        NUM_CENTROIDS   = 3  // Added environment variable for the number of centroids
       }
       security_group_ids = [aws_security_group.sg.id]
       subnet_ids         = var.subnet_ids
     }
   ]
-
   role_arn = aws_iam_role.iam_for_lambda.arn
 }
 
